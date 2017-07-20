@@ -1,0 +1,33 @@
+#!/bin/bash
+
+
+BATT="C $(acpi | egrep -o '[0-9]+%' | egrep -o '[0-9]+')%"
+DIS=$(acpi | egrep -o 'Discharging')
+if [ "$DIS" == "Discharging" ]; then
+	BATT="D $(acpi | egrep -o '[0-9]+%' | egrep -o '[0-9]+')%"
+ 
+fi
+ 
+TEMP=$(cat /sys/class/thermal/thermal_zone0/temp | egrep -o '^[0-9][0-9]')
+DATE=$(date +%m-%d-%y)
+
+TIME=$(date -u +%I:%M:%S)
+
+WIFI=$(iwgetid -r)
+if [ "$WIFI" == "" ]; then
+	WIFI="None"
+fi
+
+SONG=$(./spotify.py)
+
+VOL=$(amixer -M get Master | egrep 'Front Left' | egrep -o '[0-9]+%' | egrep -o '[0-9]+')
+
+if  [ "$(amixer -M get Master | egrep 'Front Left' | egrep -o 'off')" = "off" ]; then
+	VOL="M $VOL"
+fi
+
+if [[ "$SONG" == *"—"* ]]; then
+	echo "$SONG « VOL $VOL% « BAT $BATT « W $WIFI « $TEMP°C « $DATE « $TIME"
+else
+	echo "VOL $VOL% « BAT $BATT « W $WIFI « $TEMP°C « $DATE « $TIME"
+fi
